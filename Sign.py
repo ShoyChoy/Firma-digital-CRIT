@@ -174,7 +174,7 @@ button_3.grid(row=1, column=1, padx=5,pady=6)
 ##LOGIN
 
 # user
-user_label = ttk.Label(signin, text="Usuario:", anchor='center')
+user_label = ttk.Label(signin, text="ID del empleado:", anchor='center')
 
 user_label.pack(fill=tk.X, expand=True)
 
