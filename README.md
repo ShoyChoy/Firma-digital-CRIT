@@ -41,5 +41,5 @@ a través de los bytes y hace un hash del documento que queremos verificar. Teni
 válida y con el hash de la clave pública verifica que existe un usuario en el dataframe que tenga esa clave pública. Si esto es correcto,
 la función imprime el nombre del usuario con su clave pública junto con el hecho de que la firma es válida. Por otro lado, hay dos maneras 
 por las cuales la función regresaría que la firma es invalida:
-	- Que la firma no sea valida si es que quieres verificar con un documento donde no este esa firma.
-	- Que no exista ningun usuario con esa clave pública en el dataframe.
+- Que la firma no sea valida si es que quieres verificar con un documento donde no este esa firma.
+- Que no exista ningun usuario con esa clave pública en el dataframe.
