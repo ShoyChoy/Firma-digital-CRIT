@@ -7,6 +7,7 @@ import tkinterDnD  # Importing the tkinterDnD module
 import os
 import glob
 import fitz
+import Firmas.py
 
 def change_theme():
     # NOTE: The theme's real name is sun-valley-<mode>
