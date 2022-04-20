@@ -9,4 +9,6 @@ Hoy en día, es cada vez mas evidente que las actividades que lleva a cabo cada 
 ## **Funciones del código**
 
 ### *generarCertificado*
+Esta función, recibe como parámetros las variables usuario (la persona que se registra), ruta (directorio de donde se registrará el certificado) y psw (contraseña del usuario). Lo primero que sucede dentro de esta función es que se genera la clave privada utilizando el algoritmo de firmado ed25519, después se encripta la llave privada con la contraseña otorgada y por último se crea un archivo con la llave privada encriptada, en este caso le llamaremos certificado, este archivo se guardará en la ruta otorgada con el nombre del usuario como un archivo de texto.
 
+### *cargarPrivateKey*
