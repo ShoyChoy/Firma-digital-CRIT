@@ -2,7 +2,6 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives import serialization
 import hashlib
-import pandas as pd
 
 #usuario: quien se registra
 #ruta: directorio de donde se depositará el certificado
@@ -140,11 +139,11 @@ def registro(ruta_df,ruta_df_contrasena,ruta_carpeta, ruta_certificado, tipo):
     if tipo == 1:
         df2 = {'ID': emp_id, 'Usuario': nombre, 'Clave Pública': hash_clavepub, 'Puesto': puesto, 
                'Vigente' : 1}
-        dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': psw}
+        dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': psw, 'Tipo de Usuario':tipo}
         
     else:
         df2 = {'ID': emp_id, 'Administrador': nombre, 'Clave Pública': hash_clavepub, 'Puesto': puesto}
-        dfcontra = {'ID': emp_id, 'Administrador': nombre, 'Contraseña': psw}
+        dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': psw, 'Tipo de Usuario':0}
         
     df = df.append(df2, ignore_index = True)
     df.to_csv(ruta_df,index = False)
