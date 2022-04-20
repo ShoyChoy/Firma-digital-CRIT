@@ -63,6 +63,29 @@ def login_clicked():
     big_frame.tkraise()
     root.geometry("200x150")
 
+def verify_signature():
+    
+    v=True
+    s='Persona'
+
+    if v:
+        m=f'La firma es válida \nHa sido firmada por {s}'
+
+    showinfo(
+            title='Virificación de firma',
+            message=m
+        )
+
+def add_signature():
+    psw = tk.StringVar()
+    window = tk.Toplevel()
+    window.geometry('150x150')
+    newlabel = ttk.Label(window, text = "Contraseña:")
+    newlabel.pack(padx=5,pady=6,side=tk.LEFT)
+    newentry = ttk.Entry(window, textvariable=psw, show="*")
+    newentry.pack(fill='x', expand=True, padx=5,pady=6,side=tk.LEFT)
+    newentry.focus()
+
 def preview(sl):
     root.geometry("1100x500")
     root.resizable(True, True) 
@@ -97,6 +120,8 @@ def preview(sl):
         #p.display_file("Temp_imgs\outfile"+str(v)+".png")
 
 def drop(event):
+    button_2.config(style='Accent.TButton')
+    button_3.config(style='Accent.TButton')
     s=str(event.data)[1:-1]
     s=s.replace('} {', '\n')
     sl=s.split('\n')
@@ -144,10 +169,7 @@ def select_file():
 
         stringvar.set(s2)
         print('Item selected: ', filenames)
-        #showinfo(
-        #    title='Selected File',
-        #    message=s2
-        #)
+        
         global paths
         paths=s
 
@@ -164,17 +186,17 @@ button_1 = ttk.Button(files_frame, onfiledrop=drop, ondragstart=drag_command,
                     textvar=stringvar, padding=30, command=select_file)
 button_1.grid(row=0, column=0, columnspan = 2, padx=5,pady=5)
 
-button_2= ttk.Button(files_frame, text="Verificar Firma", command=change_theme, style="Accent.TButton")
+button_2= ttk.Button(files_frame, text="Verificar Firma", command=verify_signature)
 button_2.grid(row=1, column=0, padx=5,pady=6)
 
-button_3= ttk.Button(files_frame, text="Firmar", command=change_theme, style="Accent.TButton")
+button_3= ttk.Button(files_frame, text="Firmar", command=add_signature)
 button_3.grid(row=1, column=1, padx=5,pady=6)
 
 
 ##LOGIN
 
 # user
-user_label = ttk.Label(signin, text="ID del empleado:", anchor='center')
+user_label = ttk.Label(signin, text="ID del Empleado:", anchor='center')
 
 user_label.pack(fill=tk.X, expand=True)
 
