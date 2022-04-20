@@ -21,18 +21,18 @@ ingresar la contraseña y siempre sea correcta, la función te regresa el mensaj
 Volviendo a lo principal, la función te pedirá ingresar una nueva contraseña. Se extrae la private key y la convierte a bytes. 
 Finalmente, la función te regresa el ID del empleado junto con su nueva contraseña.
 
-### *Función Borrar*
+### *Borrar*
 Esta función recibe el directorio del dataframe que contiene a todos los usuarios y la ruta del certificado. Después, esta te pedirá
 tu contraseña, en caso de que esta sea incorrecta, el programa te pedirá que la vuelvas a ingresar. Luego, te pedirá el ID del usuario
 que queremos eliminar del dataframe. La función recorre el directorio con los usuarios para encontrar el usuario a borrar y lo elimina.
 
-### *Función Unificar Firmas*
+### *Unificar Firmas*
 Esta función recibe las rutas de todas las firmas (directorios) que queremos unificar en una sola firma principal para solo usar
 ese archivo para verificar un documento y verificar todas las firmas a la vez. Al pasarle las rutas de las firmas, la función 
 regresa un documento llamado "Firmas Unificadas", en el que esta la firma del documento, tres tabs y tres enters, y así sigue 
 la siguiente firma hasta que estén todas las firmas unificadas en el documento.
 
-### *Función Verifica*
+### *Verifica*
 Esta función recibe la ruta del documento, el directorio de la firma unificada y el directorio del dataframe que contiene a todos
 los usuarios. Primero lee el dataframe con los usuarios, lee las firmas y los separa por cada tres enters de la ruta unificada que es 
 cada persona. Después, ya que la función tiene la firma del documento y los bytes públicos de cada persona separados, separa la 
