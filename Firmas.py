@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives import serialization
 import hashlib
+import pandas as pd
 
 #usuario: quien se registra
 #ruta: directorio de donde se depositará el certificado
@@ -17,9 +18,12 @@ def generarCertificado(usuario,ruta,psw):
     format=serialization.PrivateFormat.PKCS8,
     encryption_algorithm= serialization.BestAvailableEncryption(psw)) 
     #Se crea un archivo con la llave privada encriptada (Certificado)
-    with open(ruta + "\\Certificado_" + str(usuario) +".txt","wb+") as f: 
+    ruta_cer=ruta + "\\Certificado_" + str(usuario) +".txt"
+    with open(ruta_cer,"wb+") as f: 
         f.write(private_bytes) 
         f.close()
+    
+    return ruta_cer
 
 #ruta: directorio del certificado que contiene la clave privada encriptada
 #psw: contraseña con la que se encriptó la clave privada
@@ -107,24 +111,14 @@ def firmar(rutas, directorio_firma, ruta_certificado):
 #ruta_certificado:
 #tipo:
 
-def registro(ruta_df,ruta_df_contrasena,ruta_carpeta, ruta_certificado, tipo):
+def registro(ruta_df,ruta_carpeta, tipo, datos_reg):
     df = pd.read_csv(ruta_df)
-    dfc = pd.read_csv(ruta_df_contrasena)
     
-    nombre = input('Nombre: ')
-   
+    emp_id, nombre, puesto, psw=datos_reg
+    
+    psw = bytes(psw, 'utf-8')
     while True:
-        emp_id = int(input('ID: '))
-        if emp_id in df['ID']:
-            print('Usuario ya registrado')
-        else: 
-            break
-    puesto = input('Puesto: ')
-    
-    
-    psw = bytes(input("Ingrese su contraseña: "), 'utf-8')
-    while True:
-        generarCertificado(nombre, ruta_carpeta,psw)
+        ruta_certificado=generarCertificado(nombre, ruta_carpeta,psw)
         private_key = cargarPrivateKey(ruta_certificado, psw)
         public_key = private_key.public_key()
         public_bytes = public_key.public_bytes(
@@ -138,18 +132,14 @@ def registro(ruta_df,ruta_df_contrasena,ruta_carpeta, ruta_certificado, tipo):
     
     if tipo == 1:
         df2 = {'ID': emp_id, 'Usuario': nombre, 'Clave Pública': hash_clavepub, 'Puesto': puesto, 
-               'Vigente' : 1}
-        dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': psw, 'Tipo de Usuario':tipo}
-        
+                'Vigente' : 1}
     else:
         df2 = {'ID': emp_id, 'Administrador': nombre, 'Clave Pública': hash_clavepub, 'Puesto': puesto}
-        dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': psw, 'Tipo de Usuario':0}
         
     df = df.append(df2, ignore_index = True)
     df.to_csv(ruta_df,index = False)
     
-    dfc = dfc.append(dfcontra, ignore_index = True)
-    dfc.to_csv(ruta_df_contrasena, index =  False)
+
     #print(df)
     #print(dfc)
 

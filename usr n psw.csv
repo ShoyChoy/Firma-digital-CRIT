@@ -1,2 +1,5 @@
-ID,Usuario,Contraseña,Tipo de Usuario
-1,admin,admin,0
+ID,Usuario,ContraseÃ±a,Tipo de Usuario
+1,admin,21232f297a57a5a743894a0e4a801fc3,0
+117,G V C,4d186321c1a7f0f354b297e8914ab240,1
+21,Chai,1763ea5c896f121f6e74d7bc3c16c8cb,1
+555,otro admin,21232f297a57a5a743894a0e4a801fc3,0
