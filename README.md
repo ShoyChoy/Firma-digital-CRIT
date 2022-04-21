@@ -3,6 +3,27 @@
 Hoy en día, es cada vez más evidente que las actividades que lleva a cabo cada individuo o una organización involucran la intervención de elementos relacionados con Seguridad Informática y Criptografía buscando contramedidas que no afecten el desempeño del algoritmo criptográfico utilizado, manteniendo así un protocolo criptográfico eficiente y seguro. El objetivo principal del código presentado es implementar protocolos de criptografía de clave pública para proteger ambientes que requieren rápido intercambio y almacenamiento de información. En el presente repositorio se presentará a la organización socio-formadora Teletón una implementación de firmado digital para documentos a través de algoritmos de criptografía de clave pública implementado en Jupyter Notebooks (Python 3.3).
 
 ## Archivos en el repositorio
+En el repositorio se cuenta con los siguientes archivos y carpetas que son escenciales para la corrida exitosa y total comprensión de este.
+### *firma.ipynb*
+Archivo que contiene el código completo.
+
+### *Contraseña admin.csv*
+Base de datos con el número de identificación del administrador y su contraseña.
+
+### *Admin.csv*
+Base de datos con el número de identificación del administrador, su nombre, clave prública, su puesto y contraseña.
+
+### *Contraseña usuarios.csv*
+Base de datos con el número de identificación de los usuarios, sus nombres y contraseñas.
+
+### *Usuarios y claves publicas.csv*
+Base de datos que contiene la siguiente información de todos los usuarios: ID, Nombre, Clave Pública, Puesto y la columna "Vigente" explica si el usuario es válido o no conteniendo un 1 en caso de serlo y, de lo contrario, un 0.
+
+### *Carpeta "Admins"*
+Contiene los certificados que se generan para las firmas de los administradores.
+
+### *Carpeta "Pruebas firma"*
+Contiene los siguientes docuemtos (archivos de texto): los certificados de cada uno de los usuarios, los documentos que ya han sido firmados y las firmas unificadas
 
 ## **Librerías**
 
