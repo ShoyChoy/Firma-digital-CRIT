@@ -38,15 +38,15 @@ Esta función recibe como parámetros las variables *ruta* (directorio del certi
 ### *hashea*
 Esta función recibe como parámetros la variable *ruta* (directorio donde se localiza el documento a firmar). La función abre el archivo y, con ayuda del algoritmo Hash 256, lee y actualiza el valor del string de hash en bloques de 4K. Por último devuelve el hash en formato hexadecimal.
 
-### *hashea_clavepub
+### *hashea_clavepub*
 
 Esta función recibe como parámetro la variable *clave_pub* (clave pública en bytes) . Utilizando la librería hashlib, se pasa la variable *clave_pub* por la función *hashlib.sha256* para convertirla en un hash y por último devolverla en formato hexadecimal. 
 
-### *firmar
+### *firmar*
 
 Esta función recibe como parámetros las variables *rutas* (directorios de los documentos a firmar), *directorio_firma* (directorio de la carpeta donde está ubicado el certificado) y *ruta_certificado* (directorio del certificado del usuario que firmará). El primer paso es pedir la contraseña para desencriptar la clave privada del certificado, esta se convierte a bytes y se compara con las que se encuentran en el directorio del certificado del usuario que firmará, si la contraseña es incorrecta después de tres intentos se niega el acceso. Seguido de esto se obtiene la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. Por último se crea una lista de rutas de los documentos, se hashea la ruta, se firma en bytes y se crea un archivo que contiene el documento firmado y la clave pública en bytes.
 
-### *registro
+### *registro*
 
 Esta función recibe como parámetros las variables *ruta_df* (directorio del csv con los datos de los usuarios o de los administradores), *ruta_df_contrasena* (directorio del csv con las contraseñas de usuario encriptadas), *ruta_carpeta*, *ruta_certificado* (directorio del certificado del usuario que firmará) y *tipo* (tipo de registro) y se utiliza para registrar a un usuario o administrador. En primer lugar se leen los csv con la información de los usuarios y las contraseñas, después se le pide al usuario que ingrese su nombre, su ID que se compara en la base de datos para revisar si  ya había sido registrado y el puesto. A continuación se ingresa la contraseña y se convierte en bytes para después generar el certificado, cargar la clave privada y siguiendo los mismos pasos de la función generar, se genera la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. El último paso es poner el registro como usuario o administrador y actualizar los directorios del csv.
 
