@@ -114,6 +114,11 @@ def close_window(window,entry):
 
                 ruta_certificado=os.path.abspath(f'Pruebas firma\Certificado_{usrname}.txt')
                 firmar(paths, ruta_certificado, cpsw)
+                try:
+                    firmar(paths, ruta_certificado, cpsw)
+                    showinfo(title='Éxito',message='Se ha firmado correctamente el documento')
+                except:
+                    showinfo(title='ERROR', message= 'El Documento no se ha podido firmar')
                 button_1.config(state='normal',onfiledrop=drop)
                 vercheck=False
         else:
@@ -236,6 +241,8 @@ def add_menu(usrtype):
     if usrtype==1:
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
+        configmenu.add_separator()
+        configmenu.add_command(label="Cerrar Sesión",command=donothing)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
     else:
@@ -243,6 +250,8 @@ def add_menu(usrtype):
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
         configmenu.add_command(label="Eliminar usuario", command=del_usr)
+        configmenu.add_separator()
+        configmenu.add_command(label="Cerrar Sesión",command=donothing)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
 
@@ -428,7 +437,7 @@ def sign_file():
 
 def sign_unif():
     global paths
-    check=unificar_firmas(paths,'Pruebas firma')
+    check=unificar_firmas(paths)
 
     if check:
         showinfo(title='Éxito',

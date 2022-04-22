@@ -68,7 +68,9 @@ def hashea_clavepub(clave_pub):
 def firmar(rutas, ruta_certificado, psw):
     psw = bytes(psw, 'utf-8')
     usuario = ruta_certificado.split('_')[-1].split(".")[0]
-    directorio_firma=os.path.dirname(os.path.abspath(ruta_certificado))
+    lista_rutas = rutas.split("\n")
+    #directorio_firma=os.path.dirname(os.path.abspath(ruta_certificado))
+    directorio_firma=os.path.dirname(os.path.abspath(lista_rutas[0]))
 
     private_key = cargarPrivateKey(ruta_certificado, psw)
     
@@ -80,7 +82,7 @@ def firmar(rutas, ruta_certificado, psw):
     format=serialization.PublicFormat.Raw)
     
     #Crea lista de las rutas de documentos
-    lista_rutas = rutas.split("\n")
+    
     #Itera sobre cada ruta de documento
     for i, doc in enumerate(lista_rutas):
         #Hashea la ruta
@@ -174,9 +176,10 @@ def verifica(ruta, ruta_firma, ruta_df,ruta_df_admn):
 def all_same(items):
     return all(x == items[0] for x in items)
 
-def unificar_firmas(rutas, rutaunificada):
+def unificar_firmas(rutas):
     firmas = b""
     lista_rutas = rutas.split("\n")
+    rutaunificada=os.path.dirname(os.path.abspath(lista_rutas[0]))
 
     nomdocs=[os.path.basename(ruta).split(".")[0] for ruta in lista_rutas]
     print(nomdocs)

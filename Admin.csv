@@ -1,3 +1,4 @@
 ID,Administrador,Clave Pública,Puesto,Vigente,ID anterior
-1,admin2,d0e20a56e3ed3a6fcea42dd8e8ada96ec7addb1143baccf02ce449a54a440a3e,super admin,1,nan
-,admin3,c920f3d34a165c33e7022082450cd7154539a1a74502964f94a104f99082ece0,admin,0,111/2022-04-22
+1.0,admin2,d0e20a56e3ed3a6fcea42dd8e8ada96ec7addb1143baccf02ce449a54a440a3e,super admin,1.0,
+,admin3,c920f3d34a165c33e7022082450cd7154539a1a74502964f94a104f99082ece0,admin,0.0,111/2022-04-22
+111.0,admin0,231eed5d2ed66e3c2b7225f3674b2e48a2fc9a21eb05474831cb8fa2f33b6779,admin,,
