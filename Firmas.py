@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives import serialization
 import hashlib
+import os
 import pandas as pd
 
 #usuario: quien se registra
@@ -63,24 +64,12 @@ def hashea_clavepub(clave_pub):
 #directorio_firma: directorio de la carpeta donde está ubicado el certificado
 #ruta_certificado: directorio del certificado del usuario que firmará
 
-def firmar(rutas, directorio_firma, ruta_certificado):
-    
+def firmar(rutas, ruta_certificado, psw):
+    psw = bytes(psw, 'utf-8')
     usuario = ruta_certificado.split('_')[-1].split(".")[0]
-    #Contador de intentos
-    i = 0
-    #Petición de contraseña para desencriptar la clave privada del certificado, con límite de 3 intentos como máximo
-    while True:
-        try:
-            psw = bytes(input("Ingrese su contraseña: "), 'utf-8')
-            private_key = cargarPrivateKey(ruta_certificado, psw)
-        except ValueError:
-            print("Contraseña incorrecta")
-            i += 1
-            if i == 3:
-                return "Se excedió el número de intentos máximo"
-            continue
-        else:
-            break
+    directorio_firma=os.path.dirname(os.path.abspath(ruta_certificado))
+
+    private_key = cargarPrivateKey(ruta_certificado, psw)
     
     #Obtención de clave pública en función de la privada.
     public_key = private_key.public_key()
@@ -98,7 +87,8 @@ def firmar(rutas, directorio_firma, ruta_certificado):
         #Firma el haseho en bytes
         signature = private_key.sign(bytes(hasheo, 'utf-8'))
         #Crea un archivo que contiene el documento firmado y después de 3 tabs la clave pública en bytes.
-        nombre_archivo_firma = lista_rutas[i].split("\\")[-1].split(".")[0] + "_firma_" + str(usuario)
+        #nombre_archivo_firma = lista_rutas[i].split("\\")[-1].split(".")[0] + "_firma_" + str(usuario)
+        nombre_archivo_firma = os.path.basename(doc) + "_firma_" + str(usuario)
         with open(directorio_firma + "\\" + nombre_archivo_firma + ".txt","wb+") as f:
             f.write(signature)
             f.write(b"\t\t\t")
@@ -147,6 +137,8 @@ def registro(ruta_df,ruta_carpeta, tipo, datos_reg):
 #ruta_firma: directorio de la firma
 #ruta_df: directorio del excel
 def verifica(ruta, ruta_firma, ruta_df):
+    print(ruta_firma)
+    ln=[]
     df = pd.read_csv(ruta_df)
     with open(ruta_firma,"rb") as f:
         contents = f.read().split(b"\n\n\n")
@@ -162,25 +154,42 @@ def verifica(ruta, ruta_firma, ruta_df):
             try:
                 public_key.verify(firma, bytes(hasheo, 'utf-8'))
                 usuario = df['Usuario'][df.index[df['Clave Pública'] == hashea_clavepub(public_bytes)]].tolist()[0]
-                print("Firma de " + usuario + " válida")
+                ln.append(usuario)
             except ValueError:
-                print("Firma invalida")
+                return []
+
+    return ln
 
 #rutas: directorios de las firmas que vas a unificar 
 #rutaunificada: en dónde se depositará el archivo con las firmas unificadas
+
+def all_same(items):
+    return all(x == items[0] for x in items)
+
 def unificar_firmas(rutas, rutaunificada):
     firmas = b""
     lista_rutas = rutas.split("\n")
-    for i, doc in enumerate(lista_rutas):
-        with open(doc, "rb") as f:
-            content = f.read()
-        firmas = firmas + b"\n\n\n" + content
-    firmas = firmas[3:]
-    with open(rutaunificada + "\Firmas_unificadas.txt","wb+") as f:
-            f.write(firmas)
-            f.close()
 
-def borrar(ruta_df, ruta_certificado,):
+    nomdocs=[os.path.basename(ruta).split(".")[0] for ruta in lista_rutas]
+    print(nomdocs)
+    exts=[os.path.basename(ruta).split(".")[-1] for ruta in lista_rutas]
+    print(exts)
+
+    if all_same(nomdocs) and all_same(exts) and exts[0]=='txt':
+        for i, doc in enumerate(lista_rutas):
+            with open(doc, "rb") as f:
+                content = f.read()
+            firmas = firmas + b"\n\n\n" + content
+        firmas = firmas[3:]
+        with open(f"{rutaunificada}\{nomdocs[1]}_firmas_unificadas.txt","wb+") as f:
+                f.write(firmas)
+                f.close()
+
+        return True
+    else:
+        False
+
+def borrar(ruta_df, ruta_certificado):
     while True:
         try:
             psw = bytes(input("Ingrese su contraseña: "), 'utf-8')
@@ -202,22 +211,9 @@ def borrar(ruta_df, ruta_certificado,):
     
     #Borrar entre comillas, marcarlo como no utilizable, conservar la información borrada. Política de retención de documentos.
 
-def cambiarcontraseña(ruta_certificado,ruta_contra, emp_id):
-    i = 0
-    while True:
-        try:
-            psw = bytes(input("Ingrese la contraseña actual: "), 'utf-8')
-            privatekey = cargarPrivateKey(ruta_certificado, psw)
-        except ValueError:
-            print("Contraseña incorrecta")
-            i+=1
-            if i ==3:
-                return "Se excedió el número de intentos máximo"
-            continue
-        else:
-            break
-    
-    psw_new = bytes(input("Ingrese contraseña nueva:"), 'utf-8')
+def cambiarcontraseña(ruta_certificado,psw,psw_new):
+    psw = bytes(psw, 'utf-8')
+    psw_new = bytes(psw_new, 'utf-8')
     privatekey = cargarPrivateKey(ruta_certificado, psw)
     private_bytes = privatekey.private_bytes(
     encoding=serialization.Encoding.PEM,
@@ -227,8 +223,3 @@ def cambiarcontraseña(ruta_certificado,ruta_contra, emp_id):
     with open(ruta_certificado,"wb+") as f:
         f.write(private_bytes)
         f.close()
-    df = pd.read_csv(ruta_contra)
-    id_index=df.index[df['ID'] == emp_id].tolist()[0]
-    df.at[id_index,'Contraseña'] = psw_new
-    df.to_csv(ruta_contra,index = False)
-    print(df)

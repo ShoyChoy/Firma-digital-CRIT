@@ -4,16 +4,17 @@ from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from tkdocviewer import *
 import tkinterDnD  # Importing the tkinterDnD module
-import os
 import glob
 import fitz
 from Firmas import *
 
-global dfc, logged_usr, l_user_psw, preftheme
-dfc=pd.read_csv('usr n psw.csv')
+global dfc, logged_usr, l_user_psw, preftheme, passpath, vercheck, paths
+passpath='usr n psw.csv'
+dfc=pd.read_csv(passpath)
 logged_usr=''
 l_user_psw=''
 prefs=[]
+vercheck=False
 
 with open('Preferencias.txt') as f:
     try:
@@ -41,7 +42,7 @@ tab=[]
 # You have to use the tkinterDnD.Tk object for super easy initialization,
 # and to be able to use the main window as a dnd widget
 root = tkinterDnD.Tk()  
-root.title("Firma m'esta")
+root.title("Sistema de Firma de Documentos")
 root.resizable(False, False) 
 root.geometry("225x180")
 
@@ -83,23 +84,84 @@ password2 = tk.StringVar()
 root.tk.call("source", "source\sun-valley.tcl")
 root.tk.call("set_theme", preftheme)
 
+def destroy_all():
+    for widget in root.winfo_children():
+        if isinstance(widget, tk.Toplevel):
+            widget.destroy()
+
+    button_1.config(state='normal',onfiledrop=drop)
+
 def close_window(window,entry): 
+    global dfc, logged_usr, vercheck, paths
+
     p=entry.get()
     if p=="":
         entry.state(['invalid'])
-    else:    
+    else:
+        auth = p.encode()
+        auth_hash = hashlib.md5(auth).hexdigest()
+
+        cpsw=dfc.loc[dfc['ID'] == logged_usr, 'Contraseña'].values[0]
+        if cpsw==auth_hash:
+            window.destroy()
+            if vercheck:
+                df=pd.read_csv('Usuarios y claves publicas.csv')
+                usrname=df.loc[df['ID'] == logged_usr, 'Usuario'].values[0]
+                ruta_certificado=os.path.abspath(f'Pruebas firma\Certificado_{usrname}.txt')
+                firmar(paths, ruta_certificado, cpsw)
+                button_1.config(state='normal',onfiledrop=drop)
+                vercheck=False
+        else:
+            entry.delete(0, tk.END)
+            entry.state(['invalid'])
+            showinfo(title='ERROR',
+                message='Contraseña incorrecta'
+            )
+        
+
+def change_password(window, entry, entry2,emp_id):
+    global dfc, passpath
+    psw=entry.get()
+    cpsw=entry2.get()
+    
+    df=pd.read_csv('Usuarios y claves publicas.csv')
+    usrname=df.loc[df['ID'] == logged_usr, 'Usuario'].values[0]
+    prevpass=dfc.loc[dfc['ID'] == logged_usr, 'Contraseña'].values[0]
+
+    if psw != cpsw:
+            entry.delete(0, tk.END)
+            entry2.delete(0, tk.END)
+            entry.state(['invalid'])
+            entry2.state(['invalid'])
+
+            showinfo(title='ERROR',
+                message='Las Contraseñas no coinciden'
+            )
+
+            entry.focus()
+    else:
+        auth = psw.encode()
+        psw_new= hashlib.md5(auth).hexdigest()
+        
+
+        id_index=dfc.index[dfc['ID'] == emp_id].tolist()[0]
+        dfc.at[id_index,'Contraseña'] = psw_new
+        dfc.to_csv(passpath,index = False)
+
+        cambiarcontraseña(f'Pruebas firma\Certificado_{usrname}.txt',prevpass,psw_new)
+
         window.destroy()
         button_1.config(state='normal',onfiledrop=drop)
 
 def add_menu(usrtype):
     if usrtype==1:
         configmenu = tk.Menu(menubar, tearoff=0)
-        configmenu.add_command(label="Cambiar Contraseña", command=change_theme)
+        configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
     else:
         configmenu = tk.Menu(menubar, tearoff=0)
-        configmenu.add_command(label="Cambiar Contraseña", command=change_theme)
+        configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
         configmenu.add_command(label="Eliminar usuario", command=change_theme)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
@@ -144,9 +206,20 @@ def login_clicked():
         )
 
 def signup_clicked(type):
+    global dfc, logged_usr
+
     signup = tk.Toplevel()
     signup.geometry('225x430')
     signup.resizable(False, False)
+    signup.grab_set()
+    
+    try:
+        usrtype=dfc.loc[dfc['ID'] == logged_usr, 'Tipo de Usuario'].values[0]
+    except:
+        usrtype=1
+
+    if usrtype==0:
+            insert_pass(0)  
     
     ##Signup
 
@@ -198,13 +271,15 @@ def signup_clicked(type):
     password_entry2.bind('<Return>',(lambda event: confpass_entry.focus()))
     confpass_entry.bind('<Return>',(lambda event: usercreate_clicked(type,signup, user_entry2,name_entry,password_entry2,
                                                                     confpass_entry,pos_entry)))
-    signup.grab_set()
+
+    signup.protocol("WM_DELETE_WINDOW", (lambda: [button_1.config(state='normal',onfiledrop=drop),signup.destroy()]))
+    
     #signup.tkraise()
     #root.geometry("225x460")
 
 
 def usercreate_clicked(tipo, window,user_entry2,name_entry,password_entry2,confpass_entry,pos_entry):
-    global dfc
+    global dfc, passpath
     emp_id=user_entry2.get()
     try:
         emp_id=int(emp_id)
@@ -236,47 +311,112 @@ def usercreate_clicked(tipo, window,user_entry2,name_entry,password_entry2,confp
 
         dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': hash1, 'Tipo de Usuario':tipo}
         dfc = dfc.append(dfcontra, ignore_index = True)
-        dfc.to_csv('usr n psw.csv', index =  False)
+        dfc.to_csv(passpath, index =  False)
         registro('Usuarios y claves publicas.csv','Pruebas firma',tipo, datos_reg)
 
-        close_window(window,user_entry2)
-        #signin.tkraise()
-        #root.geometry("225x180")
-    
+        window.destroy()
+        button_1.config(state='normal',onfiledrop=drop)
+        #signin.tkraise()    
 
 def verify_signature():
-    
-    v=True
-    s='Persona'
+    global paths
+    rutas=paths.split('\n')
+    ln=verifica(rutas[0], rutas[1], 'Usuarios y claves publicas.csv')
 
-    if v:
-        m=f'La firma es válida \nHa sido firmada por {s}'
+    if ln==[]:
+        m='La firma es inválida'
+    else:
+        m='Firma válida de:'
+        for name in ln:
+            m=m+'\n'+name
 
     showinfo(
             title='Verificación de firma',
             message=m
         )
 
-def add_signature():
+def sign_file():
+    global vercheck
+    vercheck =True
+    insert_pass(0)
+    
+
+def sign_unif():
+    global paths
+    check=unificar_firmas(paths,'Pruebas firma')
+
+    if check:
+        showinfo(title='Éxito',
+                    message='Se han unificado las firmas'
+                )
+    else:
+        showinfo(title='Error',
+                    message='No se han unificado las firmas, checa tus archivos'
+                )
+
+def insert_pass(windtype):
+    global logged_usr
+    usrtype=dfc.loc[dfc['ID'] == logged_usr, 'Tipo de Usuario'].values[0]
+
     button_1.config(state='disable',onfiledrop=donothing)
+    usr=tk.StringVar()
     psw = tk.StringVar()
+    confpsw= tk.StringVar()
     window = tk.Toplevel()
-
-    window.geometry('300x100')
-    window.resizable(False, False)
-    newlabel = ttk.Label(window, text = "Contraseña:")
-    newlabel.grid(row=0, column=0,padx=10,pady=6)
-    newentry = ttk.Entry(window, textvariable=psw, show="*")
-    newentry.grid(row=0, column=1, padx=5,pady=6, sticky='ew')
-    newentry.focus()
-
-    newbutton = ttk.Button(window, text = "OK",style='Accent.TButton')
-    newbutton.bind("<Button-1>", (lambda event: close_window(window,newentry)))
-    newbutton.grid(row=1, column=0,columnspan=2,padx=5,pady=6)
-
-    #window.bind('<Return>',close_window(window))
-    newentry.bind('<Return>',(lambda event: close_window(window,newentry)))
     window.grab_set()
+
+    if windtype==0:
+        window.geometry('300x100')
+        window.resizable(False, False)
+        newlabel = ttk.Label(window, text = "Contraseña:")
+        newlabel.grid(row=0, column=0,padx=10,pady=6)
+        psw_entry = ttk.Entry(window, textvariable=psw, show="*")
+        psw_entry.grid(row=0, column=1, padx=5,pady=6, sticky='ew')
+        psw_entry.focus()
+
+        newbutton = ttk.Button(window, text = "OK",style='Accent.TButton')
+        newbutton.bind("<Button-1>", (lambda event: close_window(window,psw_entry)))
+        newbutton.grid(row=1, column=0,columnspan=2,padx=5,pady=6)
+
+        psw_entry.bind('<Return>',(lambda event: close_window(window,psw_entry)))
+        window.protocol("WM_DELETE_WINDOW", destroy_all)
+
+    elif windtype==1:
+        window.geometry('320x150')
+        window.resizable(False, False)
+
+        if usrtype==0:
+            window.geometry('320x200')
+            usr_label = ttk.Label(window,text='Usuario:')
+            usr_label.grid(row=0, column=0, padx=10, pady=6)
+            usr_entry=ttk.Entry(window, textvariable=usr)
+            usr_entry.grid(row=0, column=1, padx=5, pady=6, sticky='ew')
+            emp_id=usr_entry.get()
+        else:
+            emp_id =logged_usr
+            insert_pass(0)
+
+        psw_label = ttk.Label(window, text = "Contraseña:")
+        psw_label.grid(row=1, column=0,padx=10,pady=6)
+        psw_entry = ttk.Entry(window, textvariable=psw, show="*")
+        psw_entry.grid(row=1, column=1, padx=5,pady=6, sticky='ew')
+        psw_entry.focus()
+
+        confpsw_label = ttk.Label(window, text = "Confirmar Contraseña:")
+        confpsw_label.grid(row=2, column=0,padx=10,pady=6)
+        confpsw_entry = ttk.Entry(window, textvariable=confpsw, show="*")
+        confpsw_entry.grid(row=2, column=1, padx=5,pady=6, sticky='ew')
+
+        newbutton = ttk.Button(window, text = "OK",style='Accent.TButton')
+        newbutton.bind("<Button-1>", (lambda event: change_password(window,psw_entry,confpsw_entry,emp_id)))
+        newbutton.grid(row=3, column=0,columnspan=2,padx=5,pady=6)
+
+        psw_entry.bind('<Return>',(lambda event: confpsw_entry.focus()))
+        confpsw_entry.bind('<Return>',(lambda event: change_password(window,psw_entry,confpsw_entry,emp_id)))
+
+        window.protocol("WM_DELETE_WINDOW", (lambda: [button_1.config(state='normal',onfiledrop=drop),window.destroy()]))
+
+    
 
 def preview(sl):
     root.geometry("1100x500")
@@ -301,11 +441,16 @@ def preview(sl):
         tab[i].pack(fill=tk.BOTH, expand=True)
         notebook.add(tab[i], text=os.path.basename(sl[i]))
 
-        doc = fitz.open(sl[i])
-        page = doc.load_page(0)  # number of page
-        pix = page.get_pixmap()
-        output = f"Temp_imgs\outfile{i}.png"
-        pix.save(output)
+        try:
+            doc = fitz.open(sl[i])
+            page = doc.load_page(0)  # number of page
+            pix = page.get_pixmap()
+            output = f"Temp_imgs\outfile{i}.png"
+            pix.save(output)
+        except:
+            showinfo(title='Error', message='Solo se pueden visualizar archivos PDF'
+            )
+
 
     # Display some document
     for v in range(len(sl)): 
@@ -336,8 +481,9 @@ def drop(event):
 
 def select_file():
     filetypes = (
-        ('PDF files', '*.pdf'),
+        ('PDF files', '*.pdf *.xml *.txt'),
         ('XML files', '*.xml'),
+        ('TXT files', '*.txt'),
         ('All files', '*.*')
     )
 
@@ -375,10 +521,10 @@ button_1.grid(row=0, column=0, columnspan = 3, padx=5,pady=5)
 button_2= ttk.Button(files_frame, text="Verificar Firma", command=verify_signature, state='disable')
 button_2.grid(row=1, column=0, padx=5,pady=6)
 
-button_3= ttk.Button(files_frame, text="Firmar", command=add_signature, state='disable')
+button_3= ttk.Button(files_frame, text="Firmar", command=sign_file, state='disable')
 button_3.grid(row=1, column=1, padx=5,pady=6)
 
-button_4= ttk.Button(files_frame, text="Unificar Firmas", state='disable')
+button_4= ttk.Button(files_frame, text="Unificar Firmas", command=sign_unif,state='disable')
 button_4.grid(row=1, column=2, padx=5,pady=6)
 
 ##LOGIN
