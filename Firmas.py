@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives import serialization
 import hashlib
+import datetime
 import os
 import pandas as pd
 
@@ -136,10 +137,12 @@ def registro(ruta_df,ruta_carpeta, tipo, datos_reg):
 #ruta: del documento
 #ruta_firma: directorio de la firma
 #ruta_df: directorio del excel
-def verifica(ruta, ruta_firma, ruta_df):
+def verifica(ruta, ruta_firma, ruta_df,ruta_df_admn):
     print(ruta_firma)
     ln=[]
     df = pd.read_csv(ruta_df)
+    dfa= pd.read_csv(ruta_df_admn)
+
     with open(ruta_firma,"rb") as f:
         contents = f.read().split(b"\n\n\n")
         hasheo = hashea(ruta)
@@ -153,8 +156,13 @@ def verifica(ruta, ruta_firma, ruta_df):
             df = df[df['Vigente']==1]
             try:
                 public_key.verify(firma, bytes(hasheo, 'utf-8'))
-                usuario = df['Usuario'][df.index[df['Clave Pública'] == hashea_clavepub(public_bytes)]].tolist()[0]
-                ln.append(usuario)
+                try:
+                    usuario = df['Usuario'][df.index[df['Clave Pública'] == hashea_clavepub(public_bytes)]].tolist()[0]
+                    ln.append(usuario)
+                except:
+                    
+                    usuario = dfa['Administrador'][dfa.index[dfa['Clave Pública'] == hashea_clavepub(public_bytes)]].tolist()[0]
+                    ln.append(usuario)
             except ValueError:
                 return []
 
@@ -189,25 +197,25 @@ def unificar_firmas(rutas, rutaunificada):
     else:
         False
 
-def borrar(ruta_df, ruta_certificado):
-    while True:
-        try:
-            psw = bytes(input("Ingrese su contraseña: "), 'utf-8')
-            private_key = cargarPrivateKey(ruta_certificado, psw)
-        except ValueError:
-            print("Contraseña incorrecta")
-            continue
-        else:
-            break
-    id_borrar = int(input('Ingrese el ID del usuario a eliminar: '))
+def borrar(ruta_df, ruta_certificado,id_borrar):
+
     df = pd.read_csv(ruta_df)
+
     #print(df)
     id_index=df.index[df['ID'] == id_borrar].tolist()[0]
     #print(id_index)
     #df=df.drop(df.index[id_index])
     df.at[id_index,'Vigente'] = 0
+    df = df.astype({"ID anterior": str})
+    df.at[id_index,'ID anterior'] = str(id_borrar)+'/'+str(datetime.date.today())
+    df.at[id_index,'ID'] = None
     df.to_csv(ruta_df,index = False)
-    print(df)
+
+    try:
+        os.remove(ruta_certificado)
+    except:
+        print('no existe ese archivo')
+    #print(df)
     
     #Borrar entre comillas, marcarlo como no utilizable, conservar la información borrada. Política de retención de documentos.
 

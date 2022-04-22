@@ -1,2 +1,3 @@
-ID,Administrador,Clave Pública,Puesto,Contraseña
-1,Admin0,5ba144548a44e3aa948c8d5f0a453bd1eb6f204a7f29190799af9fe32900d3d5,super admin,b'17'
+ID,Administrador,Clave Pública,Puesto,Vigente,ID anterior
+1,admin2,d0e20a56e3ed3a6fcea42dd8e8ada96ec7addb1143baccf02ce449a54a440a3e,super admin,1,nan
+,admin3,c920f3d34a165c33e7022082450cd7154539a1a74502964f94a104f99082ece0,admin,0,111/2022-04-22

@@ -105,8 +105,13 @@ def close_window(window,entry):
         if cpsw==auth_hash:
             window.destroy()
             if vercheck:
-                df=pd.read_csv('Usuarios y claves publicas.csv')
-                usrname=df.loc[df['ID'] == logged_usr, 'Usuario'].values[0]
+                try:
+                    df=pd.read_csv('Usuarios y claves publicas.csv')
+                    usrname=df.loc[df['ID'] == logged_usr, 'Usuario'].values[0]
+                except:
+                    df=pd.read_csv('Admin.csv')
+                    usrname=df.loc[df['ID'] == logged_usr, 'Administrador'].values[0]
+
                 ruta_certificado=os.path.abspath(f'Pruebas firma\Certificado_{usrname}.txt')
                 firmar(paths, ruta_certificado, cpsw)
                 button_1.config(state='normal',onfiledrop=drop)
@@ -117,16 +122,90 @@ def close_window(window,entry):
             showinfo(title='ERROR',
                 message='Contraseña incorrecta'
             )
-        
 
-def change_password(window, entry, entry2,emp_id):
+def close_del_usr(window, entry):
+    global dfc
+    usr=entry.get()
+    if usr=="":
+        entry.state(['invalid'])
+    else:
+        try:
+            usr=int(usr)
+        except:
+            usr=0
+
+        if usr !=1:
+            try:
+                usrtype=dfc.loc[dfc['ID'] == usr, 'Tipo de Usuario'].values[0]
+
+                if usrtype==1:
+                    ruta_df='Usuarios y claves publicas.csv'
+                    df=pd.read_csv(ruta_df)
+                    usrname=df.loc[df['ID'] == usr, 'Usuario'].values[0]
+                    borrar(ruta_df, f'Pruebas firma\Certificado_{usrname}.txt',usr)
+                else:
+                    ruta_df='Admin.csv'
+                    df=pd.read_csv(ruta_df)
+                    usrname=df.loc[df['ID'] == usr, 'Administrador'].values[0]
+                    borrar(ruta_df, f'Pruebas firma\Certificado_{usrname}.txt',usr)
+                
+                dfc = dfc[dfc['ID'] != usr]
+                dfc.to_csv(passpath,index = False)
+            except:
+                showinfo(title='ERROR', message='Ese usuario no existe')
+        
+        window.destroy()
+        button_1.config(state='normal',onfiledrop=drop)
+
+def del_usr():
+    button_1.config(state='disable',onfiledrop=donothing)
+    usr=tk.StringVar()
+
+    window = tk.Toplevel()
+    window.grab_set()
+
+    window.geometry('300x100')
+    window.resizable(False, False)
+    newlabel = ttk.Label(window, text = "Ingresa ID del usuario a eliminar:")
+    newlabel.grid(row=0, column=0,padx=10,pady=6)
+    usr_entry = ttk.Entry(window, textvariable=usr)
+    usr_entry.grid(row=0, column=1, padx=5,pady=6, sticky='ew')
+    usr_entry.focus()
+
+    newbutton = ttk.Button(window, text = "OK",style='Accent.TButton')
+    newbutton.bind("<Button-1>", (lambda event: close_del_usr(window,usr_entry)))
+    newbutton.grid(row=1, column=0,columnspan=2,padx=5,pady=6)
+
+    usr_entry.bind('<Return>',(lambda event: close_del_usr(window,usr_entry)))
+    window.protocol("WM_DELETE_WINDOW", destroy_all)
+
+    insert_pass(0)
+
+def change_password(window, entry, entry2,entry_emp_id):
     global dfc, passpath
     psw=entry.get()
     cpsw=entry2.get()
+    emp_id=entry_emp_id.get()
+
+    if emp_id=='':
+        emp_id=int(logged_usr)
+    else:
+        try:
+            emp_id=int(emp_id)
+        except:
+            emp_id=0
+
+    usrtype=dfc.loc[dfc['ID'] == emp_id, 'Tipo de Usuario'].values[0]
+
+    if usrtype==1:
+        df=pd.read_csv('Usuarios y claves publicas.csv')
+        usrname=df.loc[df['ID'] == emp_id, 'Usuario'].values[0]
+    else:
+        df=pd.read_csv('Admin.csv')
+        usrname=df.loc[df['ID'] == emp_id, 'Administrador'].values[0]
     
-    df=pd.read_csv('Usuarios y claves publicas.csv')
-    usrname=df.loc[df['ID'] == logged_usr, 'Usuario'].values[0]
-    prevpass=dfc.loc[dfc['ID'] == logged_usr, 'Contraseña'].values[0]
+    
+    prevpass=dfc.loc[dfc['ID'] == emp_id, 'Contraseña'].values[0]
 
     if psw != cpsw:
             entry.delete(0, tk.END)
@@ -143,8 +222,8 @@ def change_password(window, entry, entry2,emp_id):
         auth = psw.encode()
         psw_new= hashlib.md5(auth).hexdigest()
         
-
         id_index=dfc.index[dfc['ID'] == emp_id].tolist()[0]
+
         dfc.at[id_index,'Contraseña'] = psw_new
         dfc.to_csv(passpath,index = False)
 
@@ -163,7 +242,7 @@ def add_menu(usrtype):
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
-        configmenu.add_command(label="Eliminar usuario", command=change_theme)
+        configmenu.add_command(label="Eliminar usuario", command=del_usr)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
 
@@ -312,7 +391,11 @@ def usercreate_clicked(tipo, window,user_entry2,name_entry,password_entry2,confp
         dfcontra = {'ID': emp_id, 'Usuario': nombre, 'Contraseña': hash1, 'Tipo de Usuario':tipo}
         dfc = dfc.append(dfcontra, ignore_index = True)
         dfc.to_csv(passpath, index =  False)
-        registro('Usuarios y claves publicas.csv','Pruebas firma',tipo, datos_reg)
+
+        if tipo==1:
+            registro('Usuarios y claves publicas.csv','Pruebas firma',tipo, datos_reg)
+        else:
+            registro('Admin.csv','Pruebas firma',tipo, datos_reg)
 
         window.destroy()
         button_1.config(state='normal',onfiledrop=drop)
@@ -321,7 +404,9 @@ def usercreate_clicked(tipo, window,user_entry2,name_entry,password_entry2,confp
 def verify_signature():
     global paths
     rutas=paths.split('\n')
-    ln=verifica(rutas[0], rutas[1], 'Usuarios y claves publicas.csv')
+
+    ln=verifica(rutas[0], rutas[1], 'Usuarios y claves publicas.csv','Admin.csv')
+
 
     if ln==[]:
         m='La firma es inválida'
@@ -362,13 +447,14 @@ def insert_pass(windtype):
     usr=tk.StringVar()
     psw = tk.StringVar()
     confpsw= tk.StringVar()
+
     window = tk.Toplevel()
     window.grab_set()
 
     if windtype==0:
         window.geometry('300x100')
         window.resizable(False, False)
-        newlabel = ttk.Label(window, text = "Contraseña:")
+        newlabel = ttk.Label(window, text = "Ingresa tu Contraseña:")
         newlabel.grid(row=0, column=0,padx=10,pady=6)
         psw_entry = ttk.Entry(window, textvariable=psw, show="*")
         psw_entry.grid(row=0, column=1, padx=5,pady=6, sticky='ew')
@@ -385,34 +471,41 @@ def insert_pass(windtype):
         window.geometry('320x150')
         window.resizable(False, False)
 
+        
+
+        insert_pass(0)
+
+        psw_label = ttk.Label(window, text = "Contraseña Nueva:")
+        psw_label.grid(row=1, column=0,padx=10,pady=6)
+        psw_entry = ttk.Entry(window, textvariable=psw, show="*")
+        psw_entry.grid(row=1, column=1, padx=5,pady=6, sticky='ew')
+        
+        usr_entry=ttk.Entry(window, textvariable=usr)
+
         if usrtype==0:
             window.geometry('320x200')
             usr_label = ttk.Label(window,text='Usuario:')
             usr_label.grid(row=0, column=0, padx=10, pady=6)
-            usr_entry=ttk.Entry(window, textvariable=usr)
+            #usr_entry=ttk.Entry(window, textvariable=usr)
             usr_entry.grid(row=0, column=1, padx=5, pady=6, sticky='ew')
-            emp_id=usr_entry.get()
+            usr_entry.focus()
+            usr_entry.bind('<Return>',(lambda event: psw_entry.focus()))
+            #emp_id=usr_entry.get()
         else:
             emp_id =logged_usr
-            insert_pass(0)
+            psw_entry.focus()
 
-        psw_label = ttk.Label(window, text = "Contraseña:")
-        psw_label.grid(row=1, column=0,padx=10,pady=6)
-        psw_entry = ttk.Entry(window, textvariable=psw, show="*")
-        psw_entry.grid(row=1, column=1, padx=5,pady=6, sticky='ew')
-        psw_entry.focus()
-
-        confpsw_label = ttk.Label(window, text = "Confirmar Contraseña:")
+        confpsw_label = ttk.Label(window, text = "Confirmar Contraseña Nueva:")
         confpsw_label.grid(row=2, column=0,padx=10,pady=6)
         confpsw_entry = ttk.Entry(window, textvariable=confpsw, show="*")
         confpsw_entry.grid(row=2, column=1, padx=5,pady=6, sticky='ew')
 
         newbutton = ttk.Button(window, text = "OK",style='Accent.TButton')
-        newbutton.bind("<Button-1>", (lambda event: change_password(window,psw_entry,confpsw_entry,emp_id)))
+        newbutton.bind("<Button-1>", (lambda event: change_password(window,psw_entry,confpsw_entry,usr_entry)))
         newbutton.grid(row=3, column=0,columnspan=2,padx=5,pady=6)
 
         psw_entry.bind('<Return>',(lambda event: confpsw_entry.focus()))
-        confpsw_entry.bind('<Return>',(lambda event: change_password(window,psw_entry,confpsw_entry,emp_id)))
+        confpsw_entry.bind('<Return>',(lambda event:  change_password(window,psw_entry,confpsw_entry,usr_entry)))
 
         window.protocol("WM_DELETE_WINDOW", (lambda: [button_1.config(state='normal',onfiledrop=drop),window.destroy()]))
 
