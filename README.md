@@ -33,9 +33,9 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 
 Esta función genera la clave privada utilizando el algoritmo de firmado ed25519, después se encripta la llave privada con la contraseña otorgada y por último se crea un archivo con la llave privada encriptada, en este caso le llamaremos certificado, este archivo se guardará en la ruta otorgada con el nombre del usuario como un archivo de texto. 
 
-**Parámetros:** -***usuario:*** *str*, la persona que se registra. 
--***ruta:*** *str*, directorio de donde se registrará el certificado.
--***psw:*** *str*, contraseña del usuario.
+**Parámetros:** - ***usuario:*** *str*, la persona que se registra. 
+- ***ruta:*** *str*, directorio de donde se registrará el certificado.
+- ***psw:*** *str*, contraseña del usuario.
                 
 **Returns:** ***Ninguno.***
 
