@@ -33,7 +33,8 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 
 Esta función genera la clave privada utilizando el algoritmo de firmado ed25519, después se encripta la llave privada con la contraseña otorgada y por último se crea un archivo con la llave privada encriptada, en este caso le llamaremos certificado, este archivo se guardará en la ruta otorgada con el nombre del usuario como un archivo de texto. 
 
-**Parámetros:** - ***usuario:*** *str*, la persona que se registra. 
+**Parámetros:** 
+- ***usuario:*** *str*, la persona que se registra. 
 - ***ruta:*** *str*, directorio de donde se registrará el certificado.
 - ***psw:*** *str*, contraseña del usuario.
                 
@@ -42,15 +43,17 @@ Esta función genera la clave privada utilizando el algoritmo de firmado ed25519
 ### cargarPrivateKey(*ruta, psw*)
 Esta función primeramente abre y lee el archivo que contiene el certificado posteriormente desencripta la clave privada con ayuda de la contraseña y finalmente devuelve la clave privada.
 
-**Parámetros:** ***ruta:*** *str*, directorio del certificado que contiene la clave privada encriptada.
-                ***psw:*** *str*, contraseña con la que la clave privada fue encriptada previamente.
+**Parámetros:** 
+- ***ruta:*** *str*, directorio del certificado que contiene la clave privada encriptada.
+- ***psw:*** *str*, contraseña con la que la clave privada fue encriptada previamente.
                 
 **Returns:** ***private_key:*** *a*, clave privada.
 
 ### hashea(*ruta*)
 La función abre el archivo y, con ayuda del algoritmo Hash 256, lee y actualiza el valor del string de hash en bloques de 4K.
 
-**Parámetros:** ***ruta:*** *str*, directorio donde se localiza el documento a firmar.
+**Parámetros:** 
+- ***ruta:*** *str*, directorio donde se localiza el documento a firmar.
                 
 **Returns:** ***sha256_hash.hexdigest():*** *a*, hash en formato hexadecimal.
 
@@ -58,7 +61,8 @@ La función abre el archivo y, con ayuda del algoritmo Hash 256, lee y actualiza
 
 Utilizando la librería hashlib, se pasa la clave pública por la función *hashlib.sha256* para convertirla en un hash.
 
-**Parámetros:** ***clave_pub:*** *int*, clave pública en bytes. 
+**Parámetros:** 
+- ***clave_pub:*** *int*, clave pública en bytes. 
                 
 **Returns:** ***sha256_hash.hexdigest():*** *a*, hash en formato hexadecimal.
 
@@ -66,9 +70,11 @@ Utilizando la librería hashlib, se pasa la clave pública por la función *hash
 
 El primer paso es pedir la contraseña para desencriptar la clave privada del certificado, esta se convierte a bytes y se compara con las que se encuentran en el directorio del certificado del usuario que firmará, si la contraseña es incorrecta después de tres intentos se niega el acceso. Seguido de esto se obtiene la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. Por último se crea una lista de rutas de los documentos, se hashea la ruta, se firma en bytes y se crea un archivo que contiene el documento firmado y la clave pública en bytes.
 
-**Parámetros:** ***rutas:*** *str*, directorios de los documentos a firmar.
-                ***directorio_firma:*** *str*, directorio de la carpeta donde está ubicado el certificado.
-                ***ruta_certificado:*** *str*, directorio del certificado del usuario que firmará.
+**Parámetros:** 
+
+- ***rutas:*** *str*, directorios de los documentos a firmar.
+- ***directorio_firma:*** *str*, directorio de la carpeta donde está ubicado el certificado.
+- ***ruta_certificado:*** *str*, directorio del certificado del usuario que firmará.
                 
 **Returns:** ***Ninguno.***
 
@@ -76,10 +82,11 @@ El primer paso es pedir la contraseña para desencriptar la clave privada del ce
 
 Utilizada para registrar a un usuario o administrador. En primer lugar se leen los datos necesarios para registrar al usuario que son el ID, nombre y puesto y a continuación se ingresa la contraseña y se convierte en bytes para después generar el certificado, cargar la clave privada y siguiendo los mismos pasos de la función generar, se genera la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. El último paso es poner el registro como usuario o administrador y actualizar los directorios del csv.
 
-**Parámetros:** ***ruta_df:*** *str*, directorio del csv con los datos de los usuarios o de los administradores.
-                ***ruta_carpeta:*** *str*, directorio de la carpeta donde se desea almacenar los registros.
-                ***tipo:*** *str*, tipo de registro.
-                ***datos_reg:*** *lst*, lista de datos necesarios necesarios para generar un registro.
+**Parámetros:** 
+- ***ruta_df:*** *str*, directorio del csv con los datos de los usuarios o de los administradores.
+- ***ruta_carpeta:*** *str*, directorio de la carpeta donde se desea almacenar los registros.
+- ***tipo:*** *str*, tipo de registro.
+- ***datos_reg:*** *lst*, lista de datos necesarios necesarios para generar un registro.
                 
 **Returns:** ***Ninguno.***
 
@@ -89,9 +96,10 @@ Se lee la base de datos y el archivo de la firma y se genera una separación de 
 - Que la firma no sea válida si es que quieres verificar con un documento donde no esté esa firma.
 - Que no exista ningún usuario con esa clave pública en el dataframe.
 
-**Parámetros:** ***ruta:*** *str*, dirección de donde se encuentra el documento a verificar.
-                ***ruta_firma:*** *str*, ruta donde se encuentra el archivo de texto con la firma
-                ***ruta_df:*** *str*, ruta donde se encuentra la base de datos con las contraseñas de los usuarios
+**Parámetros:** 
+- ***ruta:*** *str*, dirección de donde se encuentra el documento a verificar.
+- ***ruta_firma:*** *str*, ruta donde se encuentra el archivo de texto con la firma
+- ***ruta_df:*** *str*, ruta donde se encuentra la base de datos con las contraseñas de los usuarios
                 
 **Returns:** ***ln:*** *lst*, lista de nombres que han sido verificados.
 
