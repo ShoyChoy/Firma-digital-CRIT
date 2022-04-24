@@ -35,9 +35,9 @@ Esta función genera la clave privada utilizando el algoritmo de firmado ed25519
 
 **Parámetros:** ***usuario:*** *str*, la persona que se registra. 
 
-                ***ruta:*** *str*, directorio de donde se registrará el certificado.
+***ruta:*** *str*, directorio de donde se registrará el certificado.
 
-                ***psw:*** *str*, contraseña del usuario.
+***psw:*** *str*, contraseña del usuario.
                 
 **Returns:** ***Ninguno.***
 
