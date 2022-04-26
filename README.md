@@ -38,7 +38,6 @@ Esta función genera la clave privada utilizando el algoritmo de firmado ed25519
 - ***ruta:*** *str*, directorio de donde se registrará el certificado.
 - ***psw:*** *str*, contraseña del usuario.
                 
-**Returns:** ***Ninguno.***
 
 ### cargarPrivateKey(*ruta, psw*)
 Esta función primeramente abre y lee el archivo que contiene el certificado, posteriormente desencripta la clave privada con ayuda de la contraseña y finalmente devuelve la clave privada.
@@ -55,56 +54,71 @@ La función abre el archivo y, con ayuda del algoritmo Hash 256, lee y actualiza
 **Parámetros:** 
 - ***ruta:*** *str*, directorio donde se localiza el documento a firmar.
                 
-**Returns:** ***sha256_hash.hexdigest():*** *a*, hash en formato hexadecimal.
+**Returns:** ***sha256_hash.hexdigest():*** *str*, hash en formato hexadecimal.
 
 ### hashea_clavepub(*clave_pub*)
 
 Utilizando la librería hashlib, se pasa la clave pública por la función *hashlib.sha256* para convertirla en un hash.
 
 **Parámetros:** 
-- ***clave_pub:*** *int*, clave pública en bytes. 
+- ***clave_pub:*** *bytes*, clave pública en bytes. 
                 
-**Returns:** ***sha256_hash.hexdigest():*** *a*, hash en formato hexadecimal.
+**Returns:** ***sha256_hash.hexdigest():*** *str*, hash en formato hexadecimal.
 
-### firmar(*rutas, directorio_firma, ruta_certificado*)
+### firmar(*rutas, ruta_certificado, psw*)
 
-El primer paso es pedir la contraseña para desencriptar la clave privada del certificado, esta se convierte a bytes y se compara con las que se encuentran en el directorio del certificado del usuario que firmará, si la contraseña es incorrecta después de tres intentos se niega el acceso. Seguido de esto se obtiene la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. Por último se crea una lista de rutas de los documentos, se hashea la ruta, se firma en bytes y se crea un archivo que contiene el documento firmado y la clave pública en bytes.
+Carga la clave privada del usuario, obtiene la clave pública derivada de ésta y la convierte en un objeto tipo bytes. Posteriormente haseha cada uno de los documentos que recibe y firma dichos hashes. Por cada documento se crea un archivo pem que contiene la firma, la clave pública del firmador en bytes, y la fecha de la acción, todo serparado por tres tabulaciones.
 
 **Parámetros:** 
 
-- ***rutas:*** *str*, directorios de los documentos a firmar.
+- ***rutas:*** *str*, directorios de los documentos a firmar, si son varios deben estar separados por "\n".
 - ***directorio_firma:*** *str*, directorio de la carpeta donde está ubicado el certificado.
 - ***ruta_certificado:*** *str*, directorio del certificado del usuario que firmará.
                 
-**Returns:** ***Ninguno.***
 
 ### registro(*ruta_df, ruta_carpeta, tipo, datos_reg*)
 
-Utilizada para registrar a un usuario o administrador. En primer lugar se leen los datos necesarios para registrar al usuario que son el ID, nombre y puesto y a continuación se ingresa la contraseña y se convierte en bytes para después generar el certificado, cargar la clave privada y siguiendo los mismos pasos de la función generar, se genera la clave pública en función de la privada, se serializa y se convierte en un objeto tipo bytes. El último paso es poner el registro como usuario o administrador y actualizar los directorios del csv.
+Utilizada para registrar a un usuario o administrador. En primer lugar se leen los datos necesarios para registrar al usuario . Se genera su certificado y se revisa si el hash de la clave pública no se encuentra ya en la base de datos, si es así se genera un certificado nuevo. Finalmente la base de datos correspondiente (ya sea usuario o administrador) se actualiza.
 
 **Parámetros:** 
 - ***ruta_df:*** *str*, directorio del csv con los datos de los usuarios o de los administradores.
-- ***ruta_carpeta:*** *str*, directorio de la carpeta donde se desea almacenar los registros.
-- ***tipo:*** *str*, tipo de registro.
-- ***datos_reg:*** *lst*, lista de datos necesarios necesarios para generar un registro.
-                
-**Returns:** ***Ninguno.***
+- ***ruta_carpeta:*** *str*, directorio de la carpeta donde se desea almacenar el certificado del registro.
+- ***tipo:*** *str*, tipo de registro, 1 para usuarios regulares y 0 para administradores.
+- ***datos_reg:*** *lst*, lista de datos necesarios necesarios para generar un registro (correo, nombre, puesto y contraseña).
+              
 
-### verifica (*ruta, ruta_firma, ruta_df*)
+### verifica (*ruta, ruta_firma, ruta_df, ruta_dfadmn*)
 
-Se lee la base de datos y el archivo de la firma y se genera una separación de usuarios con tres intros. Después, ya que la función tiene la firma del documento y los bytes públicos de cada usuario separados, separa la  firma de los public bytes. Luego se genera el hash de la clave pública, para hacer la comparación de la base de datos, genera la clave pública  a través de los bytes y hace un hash del documento que queremos verificar. Teniendo la clave pública, la función verifica que esta sea válida y con el hash de la clave pública verifica que existe un usuario en la base de datos que tenga esa clave pública. Si esto es correcto, la función imprime el nombre del usuario con su clave pública junto con el hecho de que la firma es válida. Por otro lado, hay dos maneras por las cuales la función regresaría que la firma es inválida:
+Hashea el documento a verificar, lee el archivo con la firma y extrae por cada firmado la firma, la clave pública del firmador y la fecha del firmado. Teniendo la clave pública, se revisa si la firma es válida y con el hash de la clave pública verifica que existe un usuario en la base de datos que tenga esa clave pública. Si esto es correcto, la función imprime el nombre del usuario firmador y la fecha de firmado junto con el hecho de que la firma es válida. Por otro lado, hay dos maneras por las cuales la función regresaría que la firma es inválida:
 - Que la firma no sea válida si es que quieres verificar con un documento donde no esté esa firma.
 - Que no exista ningún usuario con esa clave pública en el dataframe.
 
 **Parámetros:** 
 - ***ruta:*** *str*, dirección de donde se encuentra el documento a verificar.
-- ***ruta_firma:*** *str*, ruta donde se encuentra el archivo de texto con la firma
-- ***ruta_df:*** *str*, ruta donde se encuentra la base de datos con las contraseñas de los usuarios
+- ***ruta_firma:*** *str*, ruta donde se encuentra el archivo con la firma
+- ***ruta_df:*** *str*, ruta donde se encuentra la base de datos de los usuarios
+- ***ruta_dfadmn*** *str*, ruta donde se encuentra la base de datos de los administradores.
                 
-**Returns:** ***ln:*** *lst*, lista de nombres que han sido verificados.
+**Returns:** ***ln:*** *lst*, lista de nombres y fechas de las firmas válidas.
 
-### *unificarFirmas*
-Esta función recibe los parámetros *rutas* (lista de rutas que se desean unificar) y *rutaunificada* (donde se planea guardar el documento que contenga las firmas unificadas). A través de esta función se busca unificar la firma principal que será utilizada para verificar un documento y todas las firmas a la vez. Al pasarle las rutas de las firmas, la función  regresa un documento llamado "Firmas Unificadas", en el que se encuentra la firma del documento, tres tabulaciones y tres intros, y así sigue la siguiente firma hasta que estén todas las firmas unificadas en el documento.
+### all_same(*items*)
+
+Regresa True si todos los elementos en una lista son iguales. False en caso contrario.
+
+-***items*** *lst*, lista con elementos a revisar. 
+
+**Returns:** bool 
+
+### unificarFirmas (*rutas*)
+
+Une las firmas de varios usuarios de un solo documento en un archivo. Para ello la función La información de los usuarios firmadores está separada por tres intros.
+
+**Parámetros:** 
+- ***rutas:*** *str*, rutas de los archivos de firma que se desean unificar, deben estar separados por "\n".
+
+A través de esta función se busca unificar la firma principal que será utilizada para verificar un documento y todas las firmas a la vez. Al pasarle las rutas de las firmas, la función  regresa un documento llamado "Firmas Unificadas", en el que se encuentra la firma del documento, tres tabulaciones y tres intros, y así sigue la siguiente firma hasta que estén todas las firmas unificadas en el documento.
+
+**Returns:** bool
 
 ### *cambiarContraseña*
 Esta función recibe como parámetros *ruta_certificado* (dirección donde se encuentra el certificado a utilizar), *ruta_contra* (ruta donde se encuentra la base de datos con las contraseñas de los usuarios) y *emp_id* (el ID del usuario). Primeramente, la función le pide al usuario su contraseña actual y se dirige a la ruta del certificado para extraer la clave privada. En el caso de que la contraseña ingresada sea incorrecta, pedirá que se vuelva a ingresar. Si se llega a exceder el número de intentos al ingresar la contraseña y siempre sea incorrecta, la función te regresa el mensaje: "Se excedió el número de intentos máximo" y se pedirá ingresar una nueva contraseña. Una vez verificado el usuario con la contraseña correcta la función extrae la llave privada y la convierte a bytes. Finalmente, la función regresa el ID del empleado junto con su nueva contraseña y se actualiza la base de datos. 
