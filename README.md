@@ -1,6 +1,6 @@
 # Implementación segura de protocolos basados en criptografía de clave pública para organización Teletón.
 
-Hoy en día, es cada vez más evidente que las actividades que lleva a cabo cada individuo o una organización involucran la intervención de elementos relacionados con Seguridad Informática y Criptografía buscando contramedidas que no afecten el desempeño del algoritmo criptográfico utilizado, manteniendo así un protocolo criptográfico eficiente y seguro. El objetivo principal del código presentado es implementar protocolos de criptografía de clave pública para proteger ambientes que requieren rápido intercambio y almacenamiento de información. En el presente repositorio se presentará a la organización socio-formadora Teletón una implementación de firmado digital para documentos a través de algoritmos de criptografía de clave pública implementado en Jupyter Notebooks (Python 3.3).
+Hoy en día, es cada vez más evidente que las actividades que lleva a cabo cada individuo o una organización involucran la intervención de elementos relacionados con Seguridad Informática y Criptografía buscando contramedidas que no afecten el desempeño del algoritmo criptográfico utilizado, manteniendo así un protocolo criptográfico eficiente y seguro. El objetivo principal del código presentado es implementar protocolos de criptografía de clave pública para proteger ambientes que requieren rápido intercambio y almacenamiento de información. En el presente repositorio se presentará a la organización socio-formadora Teletón una implementación de firmado digital para documentos a través de algoritmos de criptografía de clave pública implementado en  Python 3.3.
 
 ## Archivos en el repositorio
 En el repositorio se cuenta con los siguientes archivos y carpetas que son escenciales para la corrida exitosa y total comprensión del código.
@@ -31,7 +31,7 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 
 ### generarCertificado(*usuario, ruta, psw*)
 
-Esta función genera la clave privada utilizando el algoritmo de firmado ed25519, después se encripta la llave privada con la contraseña otorgada y por último se crea un archivo con la llave privada encriptada, en este caso le llamaremos certificado, este archivo se guardará en la ruta otorgada con el nombre del usuario como un archivo de texto. 
+Esta función genera la clave privada utilizando el algoritmo de firmado ed25519, después se encripta la clave privada con la contraseña otorgada y por último se crea un archivo con dicha encripción, en este caso le llamaremos certificado. El certificado se guardará en la ruta otorgada de la forma "Certificado_usuario" como un archivo de texto. 
 
 **Parámetros:** 
 - ***usuario:*** *str*, la persona que se registra. 
@@ -41,13 +41,13 @@ Esta función genera la clave privada utilizando el algoritmo de firmado ed25519
 **Returns:** ***Ninguno.***
 
 ### cargarPrivateKey(*ruta, psw*)
-Esta función primeramente abre y lee el archivo que contiene el certificado posteriormente desencripta la clave privada con ayuda de la contraseña y finalmente devuelve la clave privada.
+Esta función primeramente abre y lee el archivo que contiene el certificado, posteriormente desencripta la clave privada con ayuda de la contraseña y finalmente devuelve la clave privada.
 
 **Parámetros:** 
 - ***ruta:*** *str*, directorio del certificado que contiene la clave privada encriptada.
 - ***psw:*** *str*, contraseña con la que la clave privada fue encriptada previamente.
                 
-**Returns:** ***private_key:*** *a*, clave privada.
+**Returns:** ***private_key:*** *Ed25519PrivateKey*, clave privada.
 
 ### hashea(*ruta*)
 La función abre el archivo y, con ayuda del algoritmo Hash 256, lee y actualiza el valor del string de hash en bloques de 4K.
