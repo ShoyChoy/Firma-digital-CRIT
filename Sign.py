@@ -5,7 +5,7 @@ from tkinter.messagebox import showinfo
 from tkdocviewer import *
 import tkinterDnD  # Importing the tkinterDnD module
 import glob
-import fitz
+#import fitz
 from Firmas import *
 
 global dfc, logged_usr, l_user_psw, preftheme, passpath, vercheck, paths
@@ -90,6 +90,15 @@ def destroy_all():
             widget.destroy()
 
     button_1.config(state='normal',onfiledrop=drop)
+
+def logout():
+    global logged_usr, l_user_psw
+    signin.tkraise()
+    root.geometry("225x180")
+    password_entry.delete(0, tk.END)
+    menubar.delete(2, tk.END)
+    logged_usr=''
+    l_user_psw=''
 
 def close_window(window,entry): 
     global dfc, logged_usr, vercheck, paths
@@ -242,7 +251,7 @@ def add_menu(usrtype):
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         configmenu.add_separator()
-        configmenu.add_command(label="Cerrar Sesión",command=donothing)
+        configmenu.add_command(label="Cerrar Sesión",command=logout)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
     else:
@@ -251,7 +260,7 @@ def add_menu(usrtype):
         configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
         configmenu.add_command(label="Eliminar usuario", command=del_usr)
         configmenu.add_separator()
-        configmenu.add_command(label="Cerrar Sesión",command=donothing)
+        configmenu.add_command(label="Cerrar Sesión",command=logout)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
         configmenu.add_separator
 
@@ -543,7 +552,7 @@ def preview(sl):
         tab[i].pack(fill=tk.BOTH, expand=True)
         notebook.add(tab[i], text=os.path.basename(sl[i]))
 
-        try:
+        """ try:
             doc = fitz.open(sl[i])
             page = doc.load_page(0)  # number of page
             pix = page.get_pixmap()
@@ -551,7 +560,7 @@ def preview(sl):
             pix.save(output)
         except:
             showinfo(title='Error', message='Solo se pueden visualizar archivos PDF'
-            )
+            ) """
 
 
     # Display some document
