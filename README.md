@@ -103,25 +103,35 @@ Hashea el documento a verificar, lee el archivo con la firma y extrae por cada f
 
 ### all_same(*items*)
 
-Regresa True si todos los elementos en una lista son iguales. False en caso contrario.
+Regresa True si todos los elementos en una lista son iguales. False en caso contrario. Se utiliza en unificarFirmas.
 
 -***items*** *lst*, lista con elementos a revisar. 
 
-**Returns:** bool 
+**Returns:** *bool* 
 
 ### unificarFirmas (*rutas*)
 
-Une las firmas de varios usuarios de un solo documento en un archivo. Para ello la función La información de los usuarios firmadores está separada por tres intros.
+Une las firmas de varios usuarios de un solo documento en un archivo. Para ello la función revisa si las firmas corresponden a un mismo documento, si sí regresa True, False en caso contrario. La información de los usuarios firmadores está separada por tres intros. El nombre del archivo resultante tiene la forma "nombre_del_documento_firmas_unificadas".
 
 **Parámetros:** 
 - ***rutas:*** *str*, rutas de los archivos de firma que se desean unificar, deben estar separados por "\n".
 
-A través de esta función se busca unificar la firma principal que será utilizada para verificar un documento y todas las firmas a la vez. Al pasarle las rutas de las firmas, la función  regresa un documento llamado "Firmas Unificadas", en el que se encuentra la firma del documento, tres tabulaciones y tres intros, y así sigue la siguiente firma hasta que estén todas las firmas unificadas en el documento.
+**Returns:** *bool*
 
-**Returns:** bool
+### cambiarContraseña (*ruta_certificado, psw, psw_new*)
 
-### *cambiarContraseña*
-Esta función recibe como parámetros *ruta_certificado* (dirección donde se encuentra el certificado a utilizar), *ruta_contra* (ruta donde se encuentra la base de datos con las contraseñas de los usuarios) y *emp_id* (el ID del usuario). Primeramente, la función le pide al usuario su contraseña actual y se dirige a la ruta del certificado para extraer la clave privada. En el caso de que la contraseña ingresada sea incorrecta, pedirá que se vuelva a ingresar. Si se llega a exceder el número de intentos al ingresar la contraseña y siempre sea incorrecta, la función te regresa el mensaje: "Se excedió el número de intentos máximo" y se pedirá ingresar una nueva contraseña. Una vez verificado el usuario con la contraseña correcta la función extrae la llave privada y la convierte a bytes. Finalmente, la función regresa el ID del empleado junto con su nueva contraseña y se actualiza la base de datos. 
+Desencripta la clave privada del certificado con la contraseña original para volver a encriptarla con la contraseña nueva. Reescribir el archivo del Certificado con esta nueva información.
 
-### *borrar*
-Esta función fue generada con el fin de que un administrador pueda eliminar a algún usuario y recibe como parámetros *ruta_df* (el directorio donde está almacenada la base de datos que contiene a todos los usuarios) y *ruta_certificado*. Primeramente pide al administrador su contraseña y en caso de que esta sea incorrecta, vuelve a intentarlo. Luego, pregunta el ID del usuario que se desea eliminar. Una vez obtenido el ID, la función se encarga que en la columna de la base de datos llamada "Vigente" aparezca el número 0 en el ID correspondiente, esto indicando que ya no es un usuario vigente, finalmente se actualiza la base de datos.
+**Parámetros:** 
+- ***ruta_certificado:*** *str*, directorio del certificado.
+- ***psw:*** *str*, contraseña original.
+- ***psw_new:*** *str*, contraseña nueva.
+
+### borrar (*ruta_df, ruta_certificado, id_borrar*)
+Esta función fue generada con el fin de que un administrador pueda eliminar a algún usuario. Borrar consiste en eliminar su certificado y en cambiar el valor de la columna "Vigente" de la base de datos de usuarios a 0, en lugar de 1, y también elimina el identificador del usuario para que sea posible volverse a registrar si se necesitara.
+
+**Parámetros:** 
+- ***ruta_df:*** *str*, directorio de la base de datos que contiene a los usuarios.
+- ***ruta_certificado:*** str, directorio del certificado del usuario a borrar.
+- ***id_borrar:*** str, identificador del usuario a eliminar.
+
