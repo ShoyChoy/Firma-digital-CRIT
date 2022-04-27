@@ -29,8 +29,11 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 
 ### cryptography.hazmat.primitives
 
- - Asymmetric
- - Serialization
+ - Asymmetric: 
+ - Serialization: 
+
+### hashlib
+Esta librería permite implementar una interfaz común para acceder a diferentes algoritmos criptográficos de hash. Los algoritmos de hash que incluye son FIPS SHA1, SHA224, SHA256, SHA384, SHA512 y MD5 de RSA. 
 
 ## **Funciones del código**
 
