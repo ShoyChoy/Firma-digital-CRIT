@@ -11,7 +11,7 @@ Archivo que contiene el código completo.
 Base de datos con el número de identificación del administrador y su contraseña.
 
 ### *Admin.csv*
-Base de datos con el número de identificación del administrador, su nombre, clave prública, su puesto y contraseña.
+Base de datos con el número de identificación del administrador, su nombre, clave pública, su puesto y contraseña.
 
 ### *Contraseña usuarios.csv*
 Base de datos con el número de identificación de los usuarios, sus nombres y contraseñas.
