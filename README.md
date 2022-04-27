@@ -27,6 +27,11 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 
 ## **Librerías**
 
+### cryptography.hazmat.primitives
+
+ - Asymmetric
+ - Serialization
+
 ## **Funciones del código**
 
 ### generarCertificado(*usuario, ruta, psw*)
