@@ -28,10 +28,7 @@ Contiene los siguientes docuemtos (archivos de texto): los certificados de cada 
 ## **Librerías**
 
 ### cryptography.hazmat.primitives
-
- - Asymmetric: 
- - Serialization: 
-
+Esta librería incluye interfaces de alto y bajo nivel para los algoritmos criptográficos más comunes como cifrados simétricos, resúmenes de mensajes y funciones de derivación de claves. Contiene un módulo de "Hazardous Materials" que incluye en la rama de Primitives algoritmos criptográficos de bajo nivel que son utilizados frecuentemente para crear protocolos criptográficos para sistemas de seguridad informática.
 ### hashlib
 Esta librería permite implementar una interfaz común para acceder a diferentes algoritmos criptográficos de hash. Los algoritmos de hash que incluye son FIPS SHA1, SHA224, SHA256, SHA384, SHA512 y MD5 de RSA. 
 
