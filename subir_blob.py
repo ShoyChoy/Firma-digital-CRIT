@@ -63,41 +63,6 @@ class AzureBlob:
         
     
     
-        
-        
-        
-
-# =============================================================================
-#  DECLARE VARIABLES, KEYS, AND PATHS
-# =============================================================================
-        
-# Create a local directory to hold blob data
-# local_path = "./data"
-
-# Create a file in the local data directory to upload and download
-# file_name = "pruebas.txt"
-# upload_file_path = os.path.join(local_path, file_name)
-
-
-# Open an existent blob client
-# container_name = "certificados"
-# conn_str = "DefaultEndpointsProtocol=https;AccountName=certificadoscrypto;AccountKey=xJEXMrG7Dx5r85AUT4tfSFXzKYLQDcM8wAYfoijDw+vdl4L6kMRRN1xNdG2RI4FWI2kOjwEOXZFU+AStt6B6Kw==;EndpointSuffix=core.windows.net"
- 
-# =============================================================================
-# SET CONTAINER
-# =============================================================================
-
-"container_client = set_container(conn_str, container_name)"
-
-# =============================================================================
-# UPLOAD A FILE
-# =============================================================================
-# upload(file_name, conn_str, container_name)
-
-# =============================================================================
-# DOWNLOAD FILE
-# =============================================================================
-"download(file_name,container_client)"
 
 # AB = AzureBlob(local_path, conn_str, container_name)
 

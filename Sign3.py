@@ -24,7 +24,7 @@ dfc = pd.read_sql_table("users", con=engine)
 logged_usr=''
 l_user_psw=''
 prefs=[]
-vercheck=False
+vercheck=0
 
 
 with open('Preferencias.txt') as f:
@@ -125,7 +125,7 @@ def close_window(window,entry):
         cpsw=dfc.loc[dfc['email'] == logged_usr, 'password'].values[0]
         if cpsw==auth_hash:
             window.destroy()
-            if vercheck:
+            if vercheck == 1:
                 try:
                     #df=pd.read_csv('Usuarios y claves publicas.csv')
                     df = pd.read_sql_table("public_keys", con=engine)
@@ -143,7 +143,30 @@ def close_window(window,entry):
                 except:
                     showinfo(title='ERROR', message= 'El Documento no se ha podido firmar')
                 button_1.config(state='normal',onfiledrop=drop)
-                vercheck=False
+                vercheck=0
+            elif vercheck == 2:
+                try:
+                    #df=pd.read_csv('Usuarios y claves publicas.csv')
+                    df = pd.read_sql_table("public_keys", con=engine)
+                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
+                    tipo = 1
+                except:
+                    #df=pd.read_csv('Admin.csv')
+                    df = pd.read_sql_table("admin_public_keys", con=engine)
+                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
+                    tipo = 0
+                    
+                #generarNuevoCertificado(tipo, logged_usr, cpsw)
+                #try:
+                print(tipo, logged_usr,  cpsw)
+                generarNuevoCertificado(tipo, logged_usr, cpsw)
+                showinfo(title='Éxito',message='Se ha renovado el certificado')
+                # except:
+                #     showinfo(title='ERROR', message= 'El certificado no se ha podido renovar')
+                # button_1.config(state='normal',onfiledrop=drop)
+                # vercheck=0
+                
+            
         else:
             entry.delete(0, tk.END)
             entry.state(['invalid'])
@@ -279,10 +302,19 @@ def change_password(window, entry, entry2,entry_emp_id):
         window.destroy()
         button_1.config(state='normal',onfiledrop=drop)
 
+def new_certificate():
+    global vercheck
+    vercheck = 2
+    insert_pass(0)
+    
+    
+    
+      
 def add_menu(usrtype):
     if usrtype==1:
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
+        configmenu.add_command(label="Renovar Certificado", command= new_certificate)
         configmenu.add_separator()
         configmenu.add_command(label="Cerrar Sesión",command=logout)
         menubar.add_cascade(label="Configuraciones", menu=configmenu)
@@ -290,6 +322,7 @@ def add_menu(usrtype):
     else:
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
+        configmenu.add_command(label="Renovar Certificado", command= new_certificate)
         configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
         configmenu.add_command(label="Eliminar usuario", command=del_usr)
         configmenu.add_separator()
@@ -487,7 +520,7 @@ def verify_signature():
 
 def sign_file():
     global vercheck
-    vercheck =True
+    vercheck = 1
     insert_pass(0)
     
 

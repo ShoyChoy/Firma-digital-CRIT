@@ -56,50 +56,57 @@ def generarCertificado(psw):
 #     
 #     return ruta_cer
 # =============================================================================
-
+# =============================================================================
+#     dfa = pd.read_sql_table("admin_public_keys", con=engine)
+#     dfu = pd.read_sql_table("public_keys", con=engine)
+#     df= pd.concat([dfa,dfu])
+#     dfc=pd.read_sql_table("users", con=engine)
+# 
+#     psw_db=dfc[dfc['email']==email]['password'].values[0]
+#     nombre=dfc[dfc['email']==email]['name'].values[0]
+# 
+#     #emp_id, nombre, puesto, psw=datos_reg
+#     
+#     enc = psw.encode()
+#     print("enc:", enc)
+#     hashkey = hashlib.md5(enc).hexdigest()
+#     print("psw:", psw)
+#     print(hashkey, psw_db)
+# =============================================================================
     
 
-def generarNuevoCertificado(tipo, email, psw):
-    dfa = pd.read_sql_table("admin_public_keys", con=engine)
+def generarNuevoCertificado(tipo, email, psw):   
     dfu = pd.read_sql_table("public_keys", con=engine)
+    dfa = pd.read_sql_table("admin_public_keys", con=engine)
     df= pd.concat([dfa,dfu])
     dfc=pd.read_sql_table("users", con=engine)
-
-    psw_db=dfc[dfc['email']==email]['password'].values[0]
+    
     nombre=dfc[dfc['email']==email]['name'].values[0]
+    psw = bytes(psw, "utf-8")
 
     #emp_id, nombre, puesto, psw=datos_reg
-    
-    enc = psw.encode()
-    hashkey = hashlib.md5(enc).hexdigest()
-    
-    
-    if psw_db == hashkey:
-        while True:
-            certificado = generarCertificado(psw)
-            AB.upload(emp_id, certificado)
-            private_key = cargarPrivateKey(emp_id, psw)
-            public_key = private_key.public_key()
-            public_bytes = public_key.public_bytes(
-            encoding=serialization.Encoding.Raw,
-            format=serialization.PublicFormat.Raw)
-            hash_clavepub = hashea_clavepub(public_bytes)
-            if hash_clavepub in df['public_key']:
-                continue
-            else:
-                break
-        #emp_id, nombre, puesto, psw=datos_reg
-        if tipo == 1:
-            puesto=dfu[dfu['email']==email]['position'].values[0]
-            agregarClavePublica(email,nombre,hash_clavepub,puesto)
+    while True:
+        certificado = generarCertificado(psw)
+        print(certificado)
+        AB.upload(email, certificado)
+        
+        private_key = cargarPrivateKey(email, psw)
+        public_key = private_key.public_key()
+        public_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw)
+        hash_clavepub = hashea_clavepub(public_bytes)
+        if hash_clavepub in df['public_key']:
+            continue
         else:
-            puesto=dfa[dfa['email']==email]['position'].values[0]
-            agregarClavePublicaAdmin(email,nombre,hash_clavepub,puesto)
+            break
+    #emp_id, nombre, puesto, psw=datos_reg
+    if tipo == 1:
+        puesto=dfu[dfu['email']==email]['position'].values[0]
+        agregarClavePublica(email,nombre,hash_clavepub,puesto)
     else:
-        #print('Contraseña incorrecta')
-
-        ################Gerrry HELP ############################################################
-        pass
+        puesto=dfa[dfa['email']==email]['position'].values[0]
+        agregarClavePublicaAdmin(email,nombre,hash_clavepub,puesto)
 
 
 
