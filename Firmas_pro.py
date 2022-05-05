@@ -89,7 +89,6 @@ def generarNuevoCertificado(tipo, email, psw):
     #emp_id, nombre, puesto, psw=datos_reg
     while True:
         certificado = generarCertificado(psw)
-        print(certificado)
         AB.upload(email, certificado)
         
         private_key = cargarPrivateKey(email, psw)

@@ -148,21 +148,18 @@ def close_window(window,entry):
                 try:
                     #df=pd.read_csv('Usuarios y claves publicas.csv')
                     df = pd.read_sql_table("public_keys", con=engine)
-                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
                     tipo = 1
                 except:
                     #df=pd.read_csv('Admin.csv')
                     df = pd.read_sql_table("admin_public_keys", con=engine)
-                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
                     tipo = 0
                     
                 #generarNuevoCertificado(tipo, logged_usr, cpsw)
-                #try:
-                print(tipo, logged_usr,  cpsw)
-                generarNuevoCertificado(tipo, logged_usr, cpsw)
-                showinfo(title='Éxito',message='Se ha renovado el certificado')
-                # except:
-                #     showinfo(title='ERROR', message= 'El certificado no se ha podido renovar')
+                try:
+                    generarNuevoCertificado(tipo, logged_usr, cpsw)
+                    showinfo(title='Éxito',message='Se ha renovado el certificado')
+                except:
+                    showinfo(title='ERROR', message= 'El certificado no se ha podido renovar')
                 # button_1.config(state='normal',onfiledrop=drop)
                 # vercheck=0
                 
