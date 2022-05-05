@@ -1,12 +1,12 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Text
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from tkdocviewer import *
 import tkinterDnD  # Importing the tkinterDnD module
 import glob
 #import fitz
-#import ghostscript
+import ghostscript
 from Firmas_pro import *
 
 import psycopg2, os, subprocess
@@ -55,7 +55,7 @@ tab=[]
 root = tkinterDnD.Tk()  
 root.title("Sistema de Firma de Documentos")
 root.resizable(False, False) 
-root.geometry("400x500") #"225x180"
+root.geometry("275x215") #"225x180"
 
 big_frame = ttk.Frame(root)
 big_frame.grid(row=0, column=0, sticky='nsew')
@@ -129,11 +129,11 @@ def close_window(window,entry):
                 try:
                     #df=pd.read_csv('Usuarios y claves publicas.csv')
                     df = pd.read_sql_table("public_keys", con=engine)
-                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
+                    #usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
                 except:
                     #df=pd.read_csv('Admin.csv')
                     df = pd.read_sql_table("admin_public_keys", con=engine)
-                    usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
+                    #usrname=df.loc[df['email'] == logged_usr, 'name'].values[0]
 
                 
                 firmar(paths, logged_usr, cpsw)
@@ -181,19 +181,18 @@ def close_del_usr(window, entry):
         entry.state(['invalid'])
     else:
         try:
-            email=int(email)
+            email=email
         except:
             email=0
+            
+        try:
+            usrtype=dfc.loc[dfc['email'] == email, 'user_type'].values[0]
 
-        if email !=1:
-            try:
-                usrtype=dfc.loc[dfc['email'] == email, 'user_type'].values[0]
-
-                borrar(email,usrtype)
-                
-
-            except:
-                showinfo(title='ERROR', message='Ese usuario no existe')
+            borrar(email,1)
+            showinfo(title="Éxito", message="Usuario eliminado exitosamente")
+            
+        except:
+            showinfo(title='ERROR', message='Ese usuario no existe')
         
         window.destroy()
         button_1.config(state='normal',onfiledrop=drop)
@@ -307,9 +306,24 @@ def new_certificate():
     vercheck = 2
     insert_pass(0)
     
+def print_users():
+    root.geometry("1100x500")
+    root.resizable(True, True)
+    root.grab_set()
+    text = obtenerNoValidados()
+    label = ttk.Label(root, text=text)
+    label.grid(padx=1, column = 1, row = 0)
+    # window = tk.Toplevel(root)
+    # window.grab_set()
+
+    # window.geometry('600x800')
+    # window.resizable(False, False)
+    # text = obtenerNoValidados()
+    # label = ttk.Label(window, text = text)
+    # label.grid(column = 0, row = 0)
     
     
-      
+  
 def add_menu(usrtype):
     if usrtype==1:
         configmenu = tk.Menu(menubar, tearoff=0)
@@ -323,7 +337,8 @@ def add_menu(usrtype):
         configmenu = tk.Menu(menubar, tearoff=0)
         configmenu.add_command(label="Cambiar Contraseña", command=lambda: insert_pass(1))
         configmenu.add_command(label="Renovar Certificado", command= new_certificate)
-        configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
+        #configmenu.add_command(label="Usuarios no validados", command= print_users)
+        #configmenu.add_command(label="Dar de alta usuario administrador", command=lambda: signup_clicked(0))
         configmenu.add_command(label="Eliminar usuario", command=del_usr)
         configmenu.add_separator()
         configmenu.add_command(label="Cerrar Sesión",command=logout)
@@ -372,7 +387,7 @@ def signup_clicked(type):
     global dfc, logged_usr
 
     signup = tk.Toplevel()
-    signup.geometry('350x550') #'225x430'
+    signup.geometry('350x600') #'225x430'
     signup.resizable(False, False)
     signup.grab_set()
     
@@ -550,7 +565,7 @@ def insert_pass(windtype):
     window.grab_set()
 
     if windtype==0:
-        window.geometry('300x100')
+        window.geometry('450x100')
         window.resizable(False, False)
         newlabel = ttk.Label(window, text = "Ingresa tu Contraseña:")
         newlabel.grid(row=0, column=0,padx=10,pady=6)
@@ -566,7 +581,7 @@ def insert_pass(windtype):
         window.protocol("WM_DELETE_WINDOW", destroy_all)
 
     elif windtype==1:
-        window.geometry('320x150')
+        window.geometry('450x150')
         window.resizable(False, False)
 
         
@@ -581,7 +596,7 @@ def insert_pass(windtype):
         usr_entry=ttk.Entry(window, textvariable=usr)
 
         if usrtype==0:
-            window.geometry('320x200')
+            window.geometry('500x200')
             usr_label = ttk.Label(window,text='Usuario:')
             usr_label.grid(row=0, column=0, padx=10, pady=6)
             #usr_entry=ttk.Entry(window, textvariable=usr)
@@ -610,7 +625,7 @@ def insert_pass(windtype):
     
 
 def preview(sl):
-    root.geometry("1100x500")
+    root.geometry("1200x600")
     root.resizable(True, True) 
     button_2.config(style='Accent.TButton', state='normal')
     button_3.config(style='Accent.TButton', state='normal')

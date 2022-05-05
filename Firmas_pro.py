@@ -34,6 +34,8 @@ conn_str = "DefaultEndpointsProtocol=https;AccountName=certificadoscrypto;Accoun
 
 AB = AzureBlob(local_path, conn_str, container_name)
 
+
+
 def generarCertificado(psw): 
     #Genera la llave privada utilizando ed25519 como algoritmo de firmado
     private_key = ed25519.Ed25519PrivateKey.generate()
@@ -598,7 +600,7 @@ def validar(email):
 
 #Le entrega a los admins los usuarios no validados
 def obtenerNoValidados():
-    return pd.read_sql_query("SELECT * FROM users WHERE valid = false", con=engine)
+    return pd.read_sql_query("SELECT email, name, curp FROM users WHERE valid = false", con=engine)
 
 
 #Revisa si el certificado 
@@ -629,3 +631,14 @@ def verificarVigencia():
         # close the communication with the database server by calling the close()
         if conn is not None:
             conn.close()
+
+# psw = bytes("4d186321c1a7f0f354b297e8914ab240", "utf-8" )
+# admin_ser = generarCertificado(psw)
+# email = "admin@adminmail.com"
+# AB.upload(email, admin_ser)
+# private_key = cargarPrivateKey(email, psw)
+# public_key = private_key.public_key()
+# public_bytes = public_key.public_bytes(
+# encoding=serialization.Encoding.Raw,
+# format=serialization.PublicFormat.Raw)
+# hash_clavepub = hashea_clavepub(public_bytes)
